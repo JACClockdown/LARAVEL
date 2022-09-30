@@ -26,9 +26,12 @@ class HomeController extends Controller
                     'responseQuery'  => $response->json()
                 ]);
 
-                return $response->json();
+                return response()->json([
+                    'status' => $response->status(),
+                    'data' => $response->json()
+                ]);
             }catch(\Exception $e){
-                
+
                 return response()->json([
                     'status'  => 400,
                     'message' => $e->getMessage()

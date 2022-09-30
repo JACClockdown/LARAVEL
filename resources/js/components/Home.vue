@@ -1,6 +1,9 @@
 <template>
     <div class="container">
         <hr>
+        <h1>
+            Welcome {{ this.user.name }}
+        </h1>
         <form class="row g-3" v-on:submit.prevent="submitForm">
             <div class="col-md-6">
                 <div class="col-auto">
@@ -13,49 +16,57 @@
             </div>
         </form>
         <hr>
-        <div v-if="items.length > 0" >
-            <section class="mx-auto my-5" style="max-width: 23rem;">
-                <div v-for="item in items" :key="item.id">
-                    <div class="card testimonial-card mt-2 mb-3">
-                        <div class="card-up aqua-gradient"></div>                      
-                        <div class="avatar mx-auto white">
-                            <img class="rounded-circle img-fluid" :src=item.sprites.other.home.front_shiny alt="pokemon avatar">
+        <div v-if="flag == true">
+            <div v-if="items.length > 0" >
+                <section class="mx-auto my-5" style="max-width: 23rem;">
+                    <div v-for="item in items" :key="item.id">
+                        <div class="card testimonial-card mt-2 mb-3">
+                            <div class="card-up aqua-gradient"></div>                      
+                            <div class="avatar mx-auto white">
+                                <img class="rounded-circle img-fluid" :src=item.sprites.other.home.front_shiny alt="pokemon avatar">
+                            </div>
+                            <div class="card-body">
+                                <p class="number-prefix">
+                                    <span>
+                                        N.º
+                                    </span>
+                                    {{ item.id }}
+                                </p>
+                                <h3 class="card-title">{{ item.name }}</h3>
+                                
+                                    <h6 class="abilities">
+                                        Abilities:
+                                    </h6>
+                                    <ul v-for="power in item.abilities" :key="power.id">
+                                        <li>
+                                            {{ power.ability.name }}
+                                        </li>
+                                    </ul>
+                                    <h6> Class </h6>
+                                    <ul v-for="type in item.types" :key="type.id">
+                                        <li>
+                                            {{ type.type.name }}
+                                        </li>
+                                    </ul>
+                                
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <p class="number-prefix">
-                                <span>
-                                    N.º
-                                </span>
-                                {{ item.id }}
-                            </p>
-                            <h3 class="card-title">{{ item.name }}</h3>
-                            
-                                <h6 class="abilities">
-                                    Abilities:
-                                </h6>
-                                <ul v-for="power in item.abilities" :key="power.id">
-                                    <li>
-                                        {{ power.ability.name }}
-                                    </li>
-                                </ul>
-                                <h6> Class </h6>
-                                <ul v-for="type in item.types" :key="type.id">
-                                    <li>
-                                        {{ type.type.name }}
-                                    </li>
-                                </ul>
-                            
-                        </div>
+                        <br>
                     </div>
-                    <br>
-                </div>
-            </section>
+                </section>
+            </div>
+            <div v-else>
+                <h1 class="information">
+                    No information data...
+                </h1>
+            </div>
         </div>
-        <div v-else>
-            <h1>
-                No information data
-            </h1>
+        <div v-else-if="flag == false">
+            <p>
+                Data
+            </p>
         </div>
+        
         
     </div>
 
@@ -70,8 +81,23 @@
                     name: '',
                 },
                 items: [],
-                token: localStorage.getItem('token')
+                token: localStorage.getItem('token'),
+                user: "",
+                flag: null
             }
+        },
+        async beforeMount() {
+            axios.get('http://localhost:8000/api/getuser',{
+                headers: {
+                    'Authorization': `Bearer ${this.token}`
+                }
+            })
+            .then(user => {
+                this.user = user.data
+            })
+            .catch(exception => {
+                alert(exception)
+            })
         },
         methods:{
             submitForm() {
@@ -84,13 +110,17 @@
                 })
                 .then((res) => {
                     console.log(res.data)
-                    this.items.push(res.data)
+                    if(res.status == 200){
+                        this.flag = true;
+                        this.items.push(res.data.data)
+                    }
+                    if(res.status == 400){
+                        this.flag = false;
+                    }
                 })
                 .catch((error) => {
                     console.error(error)
-                }).finally(() => {
-                
-                });
+                })
             },
         }
     }
@@ -127,5 +157,9 @@
     }
     .rounded-circle {
         border-radius: 50% !important;
+    }
+    .information {
+        position: relative;
+        text-align: center;
     }
 </style>

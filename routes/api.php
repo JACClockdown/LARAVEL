@@ -22,3 +22,4 @@ Route::post('/pokemon', [HomeController::class, 'show'])->middleware('auth:sanct
 Route::post('/showpokedex/{id?}', [HomeController::class, 'showPokedex'])->middleware('auth:sanctum');
 
 Route::post('/login', [LoginController::class,'login'])->name('login');
+Route::get('/getuser',[LoginController::class,'me'])->name('me');
